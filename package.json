@@ -1,0 +1,9 @@
+{
+  "name": "department-of-excessive-confidence",
+  "version": "1.0.0",
+  "description": "A maximalist, satirical digital shrine to Titan — The Department of Excessive Confidence",
+  "private": true,
+  "scripts": {
+    "vercel-build": "echo 'Static site, no build step required'"
+  }
+}

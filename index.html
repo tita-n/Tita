@@ -1,0 +1,2050 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Department of Excessive Confidence</title>
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.185.1/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.185.1/examples/jsm/"
+  }
+}
+</script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.15/dist/gsap.min.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--gold:#d4af37;--gold-light:#f0d060;--gold-dark:#b8962e;--bg:#0a0a0f;--bg2:#12121a;--text:#e8e8f0;--text-dim:#8888a0;--font-sans:-apple-system,'Segoe UI',system-ui,sans-serif;--font-mono:'Courier New','Consolas',monospace}
+html{scroll-behavior:smooth}
+body{font-family:var(--font-sans);background:var(--bg);color:var(--text);overflow-x:hidden;min-height:100vh;width:100%}
+a{color:var(--gold);text-decoration:none}
+a:hover{color:var(--gold-light)}
+button{cursor:pointer;font-family:var(--font-sans);border:none;outline:none;transition:all .3s}
+button:active{transform:scale(.95)}
+h1,h2,h3,h4{font-weight:700;letter-spacing:.02em}
+
+.header{position:fixed;top:0;left:0;right:0;z-index:1000;background:linear-gradient(180deg,rgba(10,10,15,.95) 60%,transparent);padding:12px 24px;display:flex;align-items:center;justify-content:space-between;pointer-events:none}
+.header>*{pointer-events:auto}
+.header h1{font-size:clamp(12px,2vw,20px);background:linear-gradient(90deg,var(--gold-dark),var(--gold),var(--gold-light));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.header-nav{display:flex;gap:8px;flex-wrap:wrap}
+.header-nav a{padding:4px 10px;border-radius:4px;font-size:11px;color:var(--text-dim);background:rgba(255,255,255,.03);transition:all .3s}
+.header-nav a:hover,.header-nav a.active{color:var(--gold);background:rgba(212,175,55,.1)}
+.header-nav a.worship-link{color:var(--gold);background:linear-gradient(135deg,rgba(212,175,55,.15),rgba(240,208,96,.05));border:1px solid rgba(212,175,55,.2)}
+
+.wing{display:none;position:relative;min-height:100vh;width:100%;overflow:hidden}
+.wing.active{display:flex;flex-direction:column;align-items:center;justify-content:center}
+.wing-overlay{position:absolute;inset:0;z-index:0;pointer-events:none}
+.wing-content{position:relative;z-index:1;width:100%;max-width:1200px;padding:80px 24px 40px}
+
+.btn-gold{background:linear-gradient(135deg,var(--gold-dark),var(--gold),var(--gold-light));color:#1a1a1a;font-weight:700;padding:14px 36px;border-radius:8px;font-size:18px;letter-spacing:.04em;box-shadow:0 4px 24px rgba(212,175,55,.3);transition:all .3s;position:relative;overflow:hidden}
+.btn-gold:hover{transform:translateY(-2px);box-shadow:0 8px 40px rgba(212,175,55,.5)}
+.btn-gold::after{content:'';position:absolute;top:-50%;left:-50%;right:-50%;bottom:-50%;background:linear-gradient(135deg,transparent,rgba(255,255,255,.2),transparent);transform:rotate(45deg);transition:all .5s;opacity:0}
+.btn-gold:hover::after{opacity:1;transform:rotate(45deg) translate(50%,50%)}
+.btn-ghost{background:transparent;border:1px solid var(--gold);color:var(--gold);padding:10px 24px;border-radius:6px;font-size:14px}
+.btn-ghost:hover{background:rgba(212,175,55,.1)}
+
+.worship-toggle{position:fixed;bottom:24px;right:24px;z-index:2000;width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,var(--gold-dark),var(--gold));box-shadow:0 0 20px rgba(212,175,55,.4);display:flex;align-items:center;justify-content:center;font-size:20px;opacity:.7;transition:all .3s}
+.worship-toggle:hover{opacity:1;transform:scale(1.1);box-shadow:0 0 40px rgba(212,175,55,.6)}
+.worship-toggle.active{opacity:1;animation:worshipPulse 1.5s infinite}
+
+@keyframes worshipPulse{0%,100%{box-shadow:0 0 20px rgba(212,175,55,.4)}50%{box-shadow:0 0 60px rgba(212,175,55,.8)}}
+
+.worship-overlay{position:fixed;inset:0;z-index:1500;pointer-events:none;opacity:0;transition:opacity .5s}
+.worship-overlay.active{opacity:1;pointer-events:auto}
+.worship-overlay canvas{position:absolute;inset:0;width:100%;height:100%}
+.worship-overlay .praise-btn{position:absolute;bottom:50%;left:50%;transform:translate(-50%,50%);padding:30px 60px;font-size:28px;background:linear-gradient(135deg,var(--gold-dark),var(--gold));color:#1a1a1a;border-radius:16px;font-weight:900;letter-spacing:.1em;box-shadow:0 0 60px rgba(212,175,55,.5);animation:worshipPulse 2s infinite;pointer-events:auto;cursor:pointer}
+.worship-overlay .praise-btn:active{transform:translate(-50%,50%) scale(.95)}
+.worship-overlay .close-worship{position:absolute;top:20px;right:20px;width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,.1);color:var(--text);font-size:20px;display:flex;align-items:center;justify-content:center;pointer-events:auto;cursor:pointer;border:1px solid rgba(255,255,255,.2)}
+.worship-overlay .close-worship:hover{background:rgba(255,255,255,.2)}
+
+.exit-modal{position:fixed;inset:0;z-index:3000;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.85)}
+.exit-modal.active{display:flex}
+.exit-modal-content{background:linear-gradient(135deg,#1a1a2e,#16213e);border:1px solid var(--gold);border-radius:16px;padding:40px;max-width:450px;text-align:center;box-shadow:0 0 80px rgba(212,175,55,.2)}
+.exit-modal-content h2{color:var(--gold);font-size:24px;margin-bottom:12px}
+.exit-modal-content p{color:var(--text-dim);margin-bottom:24px;line-height:1.6}
+.exit-modal-btns{display:flex;gap:12px;justify-content:center}
+.exit-modal-btns .btn-gold{padding:10px 24px;font-size:14px}
+.exit-modal-btns .btn-ghost{padding:10px 24px;font-size:14px;border-color:rgba(255,255,255,.2);color:var(--text-dim)}
+.exit-modal-btns .btn-ghost:hover{border-color:var(--gold);color:var(--gold)}
+
+.secret-end-modal{position:fixed;inset:0;z-index:3000;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.9)}
+.secret-end-modal.active{display:flex}
+.secret-end-content{background:linear-gradient(135deg,#1a1a2e,#2a1a3e);border:2px solid var(--gold);border-radius:20px;padding:48px;max-width:500px;text-align:center;box-shadow:0 0 120px rgba(212,175,55,.3);animation:floatIn .6s}
+@keyframes floatIn{0%{transform:translateY(40px);opacity:0}100%{transform:translateY(0);opacity:1}}
+.secret-end-content h2{color:var(--gold);font-size:28px;margin-bottom:16px}
+.secret-end-content p{color:var(--text);margin-bottom:24px;line-height:1.6;font-size:15px}
+.secret-end-content canvas{border:2px solid var(--gold);border-radius:8px;margin-bottom:16px;max-width:100%}
+.secret-end-content .btn-gold{padding:10px 24px;font-size:14px;display:inline-block}
+
+.confetti-canvas{position:fixed;inset:0;z-index:2500;pointer-events:none}
+
+/* WING 0: WARNING */
+.wing-0{background:#000;text-align:center}
+.wing-0 .warning-icon{font-size:60px;margin-bottom:20px}
+.wing-0 h2{color:var(--gold);font-size:28px;margin-bottom:16px}
+.wing-0 p{color:rgba(255,255,255,.6);font-size:16px;max-width:500px;line-height:1.6;margin-bottom:32px}
+
+/* WING 1: PRELOADER */
+.wing-1{background:#000}
+.wing-1 canvas{position:absolute;inset:0;width:100%;height:100%}
+.preloader-bar-wrap{position:absolute;bottom:80px;left:50%;transform:translateX(-50%);width:min(80%,400px);z-index:2}
+.preloader-bar-bg{width:100%;height:4px;background:rgba(255,255,255,.1);border-radius:2px;overflow:hidden}
+.preloader-bar-fill{height:100%;width:0%;background:linear-gradient(90deg,var(--gold-dark),var(--gold),var(--gold-light));border-radius:2px;transition:width .3s}
+.preloader-label{color:var(--text-dim);font-family:var(--font-mono);font-size:12px;margin-top:8px;text-align:center}
+
+/* WING 2: GREAT HALL */
+.wing-2{background:#050508}
+.wing-2 .behold-text{position:absolute;top:15%;left:50%;transform:translateX(-50%);z-index:2;text-align:center;pointer-events:none}
+.wing-2 .behold-text h2{font-size:clamp(28px,5vw,56px);background:linear-gradient(135deg,var(--gold-dark),var(--gold),var(--gold-light));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:.08em}
+.wing-2 .behold-text p{color:rgba(255,255,255,.4);font-size:14px;margin-top:8px;font-family:var(--font-mono)}
+.wing-2 .enter-btn-wrap{position:absolute;bottom:20%;left:50%;transform:translateX(-50%);z-index:2}
+.wing-2 .three-container{position:absolute;inset:0;z-index:1}
+
+/* WING 3: DASHBOARD */
+.wing-3{background:linear-gradient(135deg,#08081a,#0a0a20);padding:20px}
+.wing-3 .dashboard-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px;width:100%;max-width:1200px}
+.dash-card{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);border-radius:12px;padding:20px;backdrop-filter:blur(10px)}
+.dash-card h3{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--text-dim);margin-bottom:8px}
+.dash-card .value{font-size:28px;font-weight:700;color:var(--text)}
+.dash-card .value.gold{color:var(--gold)}
+.dash-card .value.infinity{font-size:36px}
+.brainwave-chart svg{width:100%;height:120px;display:block}
+.brainwave-chart path{fill:none;stroke:var(--gold);stroke-width:2;filter:drop-shadow(0 0 6px rgba(212,175,55,.4))}
+.terminal-feed{background:#000;border-radius:8px;padding:12px;font-family:var(--font-mono);font-size:11px;height:150px;overflow-y:auto;line-height:1.8;border:1px solid rgba(255,255,255,.05)}
+.terminal-feed .line{color:var(--text-dim)}
+.terminal-feed .line.success{color:#4ade80}
+.terminal-feed .line.warning{color:#fbbf24}
+.terminal-feed .line.error{color:#f87171}
+.terminal-feed .line.info{color:#60a5fa}
+.awards-area{position:relative;min-height:60px}
+.award-pop{position:absolute;right:0;bottom:0;background:linear-gradient(135deg,rgba(212,175,55,.15),rgba(255,255,255,.05));border:1px solid rgba(212,175,55,.2);border-radius:8px;padding:8px 14px;font-size:12px;white-space:nowrap;color:var(--gold)}
+.circle-progress{width:80px;height:80px;position:relative;margin:0 auto}
+.circle-progress svg{transform:rotate(-90deg)}
+.circle-progress .bg{fill:none;stroke:rgba(255,255,255,.05);stroke-width:6}
+.circle-progress .fg{fill:none;stroke:var(--gold);stroke-width:6;stroke-linecap:round;stroke-dasharray:251.2;stroke-dashoffset:0;filter:drop-shadow(0 0 4px rgba(212,175,55,.5))}
+.circle-progress .label{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;color:var(--gold)}
+
+/* WING 4: PRAISE */
+.wing-4{background:linear-gradient(135deg,#0a0a15,#1a1a2e)}
+.wing-4 .praise-display{font-size:clamp(18px,3vw,32px);text-align:center;max-width:700px;min-height:120px;line-height:1.5;color:var(--gold-light);font-weight:300;padding:20px}
+.wing-4 .praise-display .char{display:inline-block}
+.wing-4 .praise-btn-manual{margin-top:16px}
+
+/* WING 5: TESTIMONIALS */
+.wing-5{background:#050508}
+.wing-5 .three-container{position:absolute;inset:0;z-index:1}
+.wing-5 .testimonial-label{position:absolute;bottom:20px;left:50%;transform:translateX(-50%);z-index:2;color:var(--text-dim);font-size:12px;font-family:var(--font-mono);text-align:center;pointer-events:none}
+
+/* WING 6: TIMELINE */
+.wing-6{background:#0a0a0a;padding:0;overflow-x:auto;overflow-y:hidden}
+.wing-6::-webkit-scrollbar{height:6px}
+.wing-6::-webkit-scrollbar-track{background:rgba(255,255,255,.05)}
+.wing-6::-webkit-scrollbar-thumb{background:var(--gold-dark);border-radius:3px}
+.timeline-track{display:flex;gap:0;min-height:100vh;padding:0 40vw}
+.timeline-entry{flex-shrink:0;width:360px;padding:40px;display:flex;flex-direction:column;justify-content:center;border-left:2px solid rgba(212,175,55,.2);position:relative}
+.timeline-entry .year{font-size:42px;font-weight:900;color:var(--gold);font-family:var(--font-mono);letter-spacing:-.03em}
+.timeline-entry .desc{font-size:16px;color:var(--text);margin-top:8px;line-height:1.5;max-width:280px}
+.timeline-entry .desc .char{display:inline-block}
+.timeline-entry .sub{font-size:12px;color:var(--text-dim);margin-top:6px;font-family:var(--font-mono)}
+.timeline-add-btn{position:fixed;bottom:30px;left:50%;transform:translateX(-50%);z-index:10}
+
+/* WING 7: MUSEUM */
+.wing-7{background:#050510}
+.wing-7 .three-container{position:absolute;inset:0;z-index:1}
+.wing-7 .museum-hud{position:absolute;bottom:30px;left:50%;transform:translateX(-50%);z-index:2;text-align:center;pointer-events:none}
+.wing-7 .museum-hud p{color:var(--text-dim);font-size:12px;font-family:var(--font-mono)}
+.wing-7 .relic-label{position:absolute;top:20px;left:50%;transform:translateX(-50%);z-index:2;text-align:center;pointer-events:none;background:rgba(0,0,0,.7);border:1px solid rgba(212,175,55,.3);border-radius:8px;padding:12px 20px;max-width:400px;opacity:0;transition:opacity .3s}
+.wing-7 .relic-label.show{opacity:1}
+.wing-7 .relic-label h3{color:var(--gold);font-size:14px;margin-bottom:4px}
+.wing-7 .relic-label p{color:var(--text);font-size:12px}
+.glitch-overlay{position:absolute;inset:0;z-index:5;pointer-events:none;opacity:0;transition:opacity .3s}
+.glitch-overlay.active{opacity:1}
+.glitch-overlay canvas{width:100%;height:100%}
+
+/* WING 8: ROAST */
+.wing-8{background:#050510;font-family:var(--font-mono)}
+.wing-8 .roast-output{max-width:600px;width:100%;text-align:left;padding:20px}
+.roast-line{color:var(--text-dim);margin-bottom:4px;font-size:14px;line-height:1.6;opacity:0;transition:opacity .5s}
+.roast-line.show{opacity:1}
+.roast-line.success{color:#4ade80}
+.roast-line.warning{color:#fbbf24}
+.roast-line.error{color:#f87171}
+.roast-line.glitch{color:var(--gold);font-weight:700}
+.roast-bar-wrap{width:100%;max-width:400px;margin-bottom:20px}
+.roast-bar-bg{width:100%;height:4px;background:rgba(255,255,255,.1);border-radius:2px;overflow:hidden}
+.roast-bar-fill{height:100%;width:0%;background:linear-gradient(90deg,#60a5fa,var(--gold));border-radius:2px;transition:width .3s}
+
+/* WING 9: PROPHECY */
+.wing-9{background:#050510;font-family:var(--font-mono);text-align:center}
+.wing-9 h2{color:var(--gold);font-size:20px;margin-bottom:20px}
+.wing-9 .prophecy-bar-wrap{width:min(80%,400px);margin-bottom:16px}
+.wing-9 .prophecy-bar-bg{width:100%;height:6px;background:rgba(255,255,255,.1);border-radius:3px;overflow:hidden}
+.wing-9 .prophecy-bar-fill{height:100%;width:0%;background:linear-gradient(90deg,var(--gold-dark),var(--gold),var(--gold-light));border-radius:3px;transition:width .2s}
+.wing-9 .prophecy-status{color:var(--text-dim);font-size:12px;margin-bottom:12px;min-height:40px}
+.wing-9 .prophecy-messages{color:var(--text-dim);font-size:11px;line-height:1.8;max-width:400px}
+.wing-9 .prophecy-escape{display:block;margin-top:40px;color:var(--text-dim);font-size:12px;opacity:.5}
+.wing-9 .prophecy-escape:hover{opacity:1;color:var(--gold)}
+
+/* WING 10: SOURCE CODE */
+.wing-10{background:#0d1117;font-family:var(--font-mono);padding:20px}
+.github-layout{width:100%;max-width:800px;background:#161b22;border:1px solid #30363d;border-radius:8px;overflow:hidden}
+.github-header{background:#161b22;padding:12px 16px;border-bottom:1px solid #30363d;display:flex;align-items:center;gap:8px}
+.github-dot{width:12px;height:12px;border-radius:50%}
+.github-dot.red{background:#ff6b6b}
+.github-dot.yellow{background:#ffd93d}
+.github-dot.green{background:#6bcf7f}
+.github-layout h3{color:var(--text);font-size:13px;margin-left:8px}
+.github-body{display:grid;grid-template-columns:220px 1fr;min-height:400px}
+.github-sidebar{background:#0d1117;border-right:1px solid #30363d;padding:12px 0}
+.github-sidebar .file{padding:6px 16px;font-size:12px;color:var(--text-dim);cursor:pointer;display:flex;align-items:center;gap:6px}
+.github-sidebar .file:hover{background:rgba(255,255,255,.03);color:var(--text)}
+.github-sidebar .file.active{color:var(--text);background:rgba(255,255,255,.05)}
+.github-sidebar .file .icon{color:var(--gold);font-size:14px}
+.github-sidebar .file .size{color:#484f58;margin-left:auto;font-size:10px}
+.github-main{padding:16px}
+.github-main .file-header{color:var(--text);font-size:13px;padding-bottom:8px;border-bottom:1px solid #30363d;margin-bottom:12px}
+.github-main code{white-space:pre;font-size:12px;line-height:1.8;color:#c9d1d9}
+.github-commits{margin-top:16px;border-top:1px solid #30363d;padding:12px 16px}
+.github-commits h4{color:var(--text-dim);font-size:11px;text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px}
+.github-commit{display:flex;align-items:center;gap:8px;padding:4px 0;font-size:12px;color:var(--text-dim)}
+.github-commit .msg{color:var(--text)}
+.github-commit .hash{color:#484f58;font-size:10px}
+.github-commit .tag{display:inline-block;padding:1px 6px;border-radius:3px;font-size:10px;font-family:var(--font-sans);font-weight:600}
+.github-commit .tag.feat{background:rgba(35,134,54,.2);color:#3fb950}
+.github-commit .tag.fix{background:rgba(218,165,32,.2);color:#d29922}
+.github-commit .tag.chore{background:rgba(139,148,158,.2);color:#8b949e}
+.github-commit .tag.refactor{background:rgba(88,166,255,.2);color:#58a6ff}
+
+@media(max-width:768px){
+.dashboard-grid{grid-template-columns:1fr!important}
+.github-body{grid-template-columns:1fr}
+.github-sidebar{display:none}
+.timeline-entry{width:280px;padding:24px}
+.timeline-entry .year{font-size:28px}
+.header h1{font-size:12px}
+.header-nav a{font-size:9px;padding:2px 6px}
+.wing-content{padding:60px 16px 30px}
+.wing-0 h2{font-size:22px}
+.wing-0 p{font-size:14px}
+.worship-overlay .praise-btn{padding:20px 40px;font-size:20px}
+.exit-modal-content{padding:24px;margin:16px}
+.secret-end-content{padding:24px;margin:16px}
+}
+</style>
+</head>
+<body>
+
+<header class="header" id="mainHeader">
+  <h1>✦ The Department of Excessive Confidence</h1>
+  <nav class="header-nav" id="headerNav">
+    <a href="#/dashboard" class="worship-link">✦ Sanctuary</a>
+    <a href="#/praise">Praise</a>
+    <a href="#/testimonials">Voices</a>
+    <a href="#/timeline">Timeline</a>
+    <a href="#/museum">Museum</a>
+    <a href="#/roast">Roast</a>
+    <a href="#/prophecy">Prophecy</a>
+    <a href="#/source">Source</a>
+  </nav>
+</header>
+
+<button class="worship-toggle" id="worshipToggle" title="Enter Worship Mode">✦</button>
+
+<!-- WING 0: WARNING -->
+<section class="wing wing-0" id="wing-0" data-wing="0">
+  <div class="wing-content" style="text-align:center">
+    <div class="warning-icon">⚠️</div>
+    <h2>WARNING</h2>
+    <p>This website contains dangerously high concentrations of ego. Proceed only if you are emotionally prepared.</p>
+    <button class="btn-gold" id="enterWarning">Enter</button>
+  </div>
+</section>
+
+<!-- WING 1: PRELOADER -->
+<section class="wing wing-1" id="wing-1" data-wing="1">
+  <canvas id="preloaderCanvas"></canvas>
+  <div class="preloader-bar-wrap">
+    <div class="preloader-bar-bg"><div class="preloader-bar-fill" id="preloaderFill"></div></div>
+    <div class="preloader-label" id="preloaderLabel">Initializing Greatness...</div>
+  </div>
+</section>
+
+<!-- WING 2: GREAT HALL -->
+<section class="wing wing-2" id="wing-2" data-wing="2">
+  <div class="three-container" id="greatHallThree"></div>
+  <div class="behold-text">
+    <h2>Behold, The Legend</h2>
+    <p>✦ The presence you've been waiting for ✦</p>
+  </div>
+  <div class="enter-btn-wrap"><button class="btn-gold" id="enterSanctuary">Enter the Sanctuary</button></div>
+</section>
+
+<!-- WING 3: DASHBOARD -->
+<section class="wing wing-3" id="wing-3" data-wing="3">
+  <div class="wing-content" style="padding-top:100px">
+    <div class="dashboard-grid" id="dashboardGrid">
+      <div class="dash-card"><h3>Aura</h3><div class="value infinity gold">∞</div></div>
+      <div class="dash-card"><h3>Bugs Fixed</h3><div class="value">Probably.</div></div>
+      <div class="dash-card"><h3>Bugs Created</h3><div class="value">Classified.</div></div>
+      <div class="dash-card"><h3>Lines of Code</h3><div class="value">Enough.</div></div>
+      <div class="dash-card"><h3>Confidence</h3>
+        <div class="circle-progress"><svg viewBox="0 0 88 88"><circle class="bg" cx="44" cy="44" r="40"/><circle class="fg" id="confidenceCircle" cx="44" cy="44" r="40" stroke-dashoffset="0"/></svg><div class="label">127%</div></div>
+      </div>
+      <div class="dash-card"><h3>Sleep</h3><div class="value" style="font-family:var(--font-mono);color:var(--text-dim);font-size:14px">404 Not Found</div></div>
+      <div class="dash-card brainwave-chart"><h3>Brainwave Frequency</h3><svg id="brainwaveSvg" preserveAspectRatio="none" viewBox="0 0 400 120"><path id="brainwavePath" d="M0 60"/></svg></div>
+      <div class="dash-card"><h3>Terminal Feed</h3><div class="terminal-feed" id="terminalFeed"></div></div>
+      <div class="dash-card"><h3>Awards</h3><div class="awards-area" id="awardsArea"></div></div>
+      <div class="dash-card"><h3>Worldwide Praise</h3><div class="value gold" id="praiseCounter">14,837,291</div></div>
+    </div>
+    <div style="margin-top:24px;text-align:center;color:var(--text-dim);font-size:12px;font-family:var(--font-mono)">Explore the Halls of Greatness ↑</div>
+  </div>
+</section>
+
+<!-- WING 4: PRAISE HALL -->
+<section class="wing wing-4" id="wing-4" data-wing="4">
+  <div class="wing-content" style="align-items:center">
+    <h2 style="color:var(--gold);font-size:20px;margin-bottom:16px">The Hall of Infinite Praise</h2>
+    <div class="praise-display" id="praiseDisplay"></div>
+    <button class="btn-ghost praise-btn-manual" id="regeneratePraise">Generate New Praise</button>
+  </div>
+</section>
+
+<!-- WING 5: TESTIMONIALS -->
+<section class="wing wing-5" id="wing-5" data-wing="5">
+  <div class="three-container" id="testimonialsThree"></div>
+  <div class="testimonial-label">Click a cube to read a testimonial — click again to zoom out</div>
+</section>
+
+<!-- WING 6: TIMELINE -->
+<section class="wing wing-6" id="wing-6" data-wing="6">
+  <div class="timeline-track" id="timelineTrack"></div>
+  <button class="btn-ghost timeline-add-btn" id="addTimelineEntry">+ Add Current Time</button>
+</section>
+
+<!-- WING 7: MUSEUM -->
+<section class="wing wing-7" id="wing-7" data-wing="7">
+  <div class="three-container" id="museumThree"></div>
+  <div class="glitch-overlay" id="glitchOverlay"><canvas id="glitchCanvas"></canvas></div>
+  <div class="relic-label" id="relicLabel"><h3></h3><p></p></div>
+  <div class="museum-hud"><p>← → to navigate • Hover the central relic for a surprise</p></div>
+</section>
+
+<!-- WING 8: ROAST -->
+<section class="wing wing-8" id="wing-8" data-wing="8">
+  <div class="wing-content" style="align-items:center">
+    <h2 style="color:var(--gold);font-size:18px;margin-bottom:20px;font-family:var(--font-sans)">AI Roast Chamber</h2>
+    <div class="roast-bar-wrap"><div class="roast-bar-bg"><div class="roast-bar-fill" id="roastBarFill"></div></div></div>
+    <div class="roast-output" id="roastOutput"></div>
+    <button class="btn-ghost" id="rerunRoast" style="margin-top:16px;display:none">Re-analyze</button>
+  </div>
+</section>
+
+<!-- WING 9: PROPHECY -->
+<section class="wing wing-9" id="wing-9" data-wing="9">
+  <div class="wing-content" style="align-items:center">
+    <h2>Calculating the full extent of your greatness…</h2>
+    <div class="prophecy-bar-wrap"><div class="prophecy-bar-bg"><div class="prophecy-bar-fill" id="prophecyFill"></div></div></div>
+    <div class="prophecy-status" id="prophecyStatus">Initializing quantum benchmarks...</div>
+    <div class="prophecy-messages" id="prophecyMessages"></div>
+    <a href="#/dashboard" class="prophecy-escape">I am humble enough to leave this loop.</a>
+  </div>
+</section>
+
+<!-- WING 10: SOURCE CODE -->
+<section class="wing wing-10" id="wing-10" data-wing="10">
+  <div class="wing-content" style="align-items:center">
+    <div class="github-layout">
+      <div class="github-header">
+        <div class="github-dot red"></div><div class="github-dot yellow"></div><div class="github-dot green"></div>
+        <h3>titan / ego-monorepo</h3>
+      </div>
+      <div class="github-body">
+        <div class="github-sidebar">
+          <div class="file active" data-file="greatness"><span class="icon">⎔</span> greatness.ts <span class="size">1 KB</span></div>
+          <div class="file" data-file="confidence"><span class="icon">⎔</span> confidence.ts <span class="size">1 KB</span></div>
+          <div class="file" data-file="modesty"><span class="icon">⎔</span> modesty.ts <span class="size">0 B</span></div>
+        </div>
+        <div class="github-main">
+          <div class="file-header" id="sourceFileName">greatness.ts</div>
+          <code id="sourceCode">export const titan = Infinity;</code>
+          <div class="github-commits">
+            <h4>Latest Commits</h4>
+            <div class="github-commit"><span class="tag feat">feat</span><span class="msg">increased confidence</span><span class="hash">a1b2c3d</span></div>
+            <div class="github-commit"><span class="tag fix">fix</span><span class="msg">patched occasional modesty leak</span><span class="hash">e4f5g6h</span></div>
+            <div class="github-commit"><span class="tag feat">feat</span><span class="msg">added more ego</span><span class="hash">i7j8k9l</span></div>
+            <div class="github-commit"><span class="tag refactor">refactor</span><span class="msg">removed self-doubt</span><span class="hash">m0n1o2p</span></div>
+            <div class="github-commit"><span class="tag chore">chore</span><span class="msg">updated README with more praise</span><span class="hash">q3r4s5t</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- WORSHIP OVERLAY -->
+<div class="worship-overlay" id="worshipOverlay">
+  <canvas id="worshipCanvas"></canvas>
+  <button class="praise-btn" id="praiseTitanBtn">PRAISE TITAN</button>
+  <button class="close-worship" id="closeWorship">✕</button>
+</div>
+
+<!-- EXIT MODAL -->
+<div class="exit-modal" id="exitModal">
+  <div class="exit-modal-content">
+    <h2>✦ Depart so soon? ✦</h2>
+    <p>Are you sure you want to leave the presence of greatness?</p>
+    <div class="exit-modal-btns">
+      <button class="btn-gold" id="exitStay">Stay</button>
+      <button class="btn-ghost" id="exitLeave">Leave</button>
+    </div>
+  </div>
+</div>
+
+<!-- SECRET ENDING -->
+<div class="secret-end-modal" id="secretEndModal">
+  <div class="secret-end-content">
+    <h2>✦ Achievement Unlocked ✦</h2>
+    <p><strong>The Ego Experience</strong><br>A certificate confirming that absolutely nothing has changed.</p>
+    <canvas id="certificateCanvas" width="400" height="280"></canvas>
+    <button class="btn-gold" id="downloadCert">Download Certificate</button>
+    <button class="btn-ghost" id="closeSecretEnd" style="margin-left:8px">Close</button>
+  </div>
+</div>
+
+<canvas class="confetti-canvas" id="confettiCanvas"></canvas>
+
+<script type="module">
+import * as THREE from 'three';
+import { CSS2DRenderer, CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
+
+// ─── STATE MANAGER ───────────────────────────────────────────────────────────
+const State = {
+  _visited: new Set(),
+  _praiseCount: 0,
+  _worshipMode: false,
+  _praiseClicks: 0,
+
+  init() {
+    try {
+      const v = JSON.parse(localStorage.getItem('titan_visited') || '[]');
+      this._visited = new Set(v);
+      this._praiseCount = parseInt(localStorage.getItem('titan_praise') || '14837291', 10);
+      this._praiseClicks = parseInt(localStorage.getItem('titan_praise_clicks') || '0', 10);
+    } catch(e) { /* ignore */ }
+  },
+
+  save() {
+    try {
+      localStorage.setItem('titan_visited', JSON.stringify([...this._visited]));
+      localStorage.setItem('titan_praise', String(this._praiseCount));
+      localStorage.setItem('titan_praise_clicks', String(this._praiseClicks));
+    } catch(e) { /* ignore */ }
+  },
+
+  visitWing(id) {
+    this._visited.add(String(id));
+    this.save();
+    if (this._visited.size >= 10) this._checkSecretEnding();
+  },
+
+  hasVisited(id) { return this._visited.has(String(id)); },
+
+  get visitedCount() { return this._visited.size; },
+
+  _secretShown: false,
+  _checkSecretEnding() {
+    if (this._secretShown) return;
+    if (this._visited.size >= 10) {
+      this._secretShown = true;
+      setTimeout(() => showSecretEnding(), 800);
+    }
+  },
+
+  addPraise() {
+    this._praiseCount += Math.floor(Math.random() * 13) + 1;
+    this._praiseClicks++;
+    this.save();
+    return this._praiseCount;
+  },
+
+  get praiseCount() { return this._praiseCount; },
+  get praiseClicks() { return this._praiseClicks; },
+};
+
+// ─── SOUND ENGINE ────────────────────────────────────────────────────────────
+const Sound = {
+  ctx: null,
+  _choirNodes: [],
+  _worshipNodes: [],
+  _choirGain: null,
+  _worshipGain: null,
+  _initialized: false,
+
+  _ensureCtx() {
+    if (!this.ctx) this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+    if (this.ctx.state === 'suspended') this.ctx.resume();
+    return this.ctx;
+  },
+
+  bootUp() {
+    const ctx = this._ensureCtx();
+    const now = ctx.currentTime;
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = 'sawtooth';
+    osc.frequency.setValueAtTime(50, now);
+    osc.frequency.linearRampToValueAtTime(200, now + 1.5);
+    gain.gain.setValueAtTime(0.3, now);
+    gain.gain.linearRampToValueAtTime(0, now + 1.8);
+    osc.connect(gain).connect(ctx.destination);
+    osc.start(now);
+    osc.stop(now + 1.8);
+
+    const noise = ctx.createBufferSource();
+    const buf = ctx.createBuffer(1, ctx.sampleRate * 0.05, ctx.sampleRate);
+    const d = buf.getChannelData(0);
+    for (let i = 0; i < d.length; i++) d[i] = (Math.random() * 2 - 1) * Math.exp(-i / (ctx.sampleRate * 0.01));
+    noise.buffer = buf;
+    const ng = ctx.createGain();
+    ng.gain.setValueAtTime(0.4, now + 1.5);
+    ng.gain.linearRampToValueAtTime(0, now + 1.65);
+    noise.connect(ng).connect(ctx.destination);
+    noise.start(now + 1.5);
+  },
+
+  startChoir() {
+    if (this._choirNodes.length) return;
+    const ctx = this._ensureCtx();
+    const now = ctx.currentTime;
+    this._choirGain = ctx.createGain();
+    this._choirGain.gain.setValueAtTime(0, now);
+    this._choirGain.gain.linearRampToValueAtTime(0.08, now + 2);
+    this._choirGain.connect(ctx.destination);
+
+    const freqs = [130.81, 164.81, 196.00, 261.63];
+    freqs.forEach(f => {
+      for (let detune of [-5, 0, 5]) {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(f, now);
+        osc.detune.setValueAtTime(detune, now);
+        gain.gain.setValueAtTime(0.3 / freqs.length / 3, now);
+        const lfo = ctx.createOscillator();
+        const lfoGain = ctx.createGain();
+        lfo.frequency.setValueAtTime(0.3 + Math.random() * 0.2, now);
+        lfoGain.gain.setValueAtTime(0.5, now);
+        lfo.connect(lfoGain).connect(gain.gain);
+        osc.connect(gain).connect(this._choirGain);
+        osc.start(now);
+        lfo.start(now);
+        this._choirNodes.push({ osc, gain, lfo, lfoGain });
+      }
+    });
+  },
+
+  stopChoir() {
+    this._choirNodes.forEach(n => {
+      try { n.osc.stop(); n.lfo.stop(); } catch(e) {}
+    });
+    this._choirNodes = [];
+    if (this._choirGain) {
+      this._choirGain.gain.linearRampToValueAtTime(0, this.ctx.currentTime + 0.5);
+      setTimeout(() => { try { this._choirGain.disconnect(); } catch(e) {} }, 600);
+    }
+  },
+
+  startWorshipChoir() {
+    if (this._worshipNodes.length) return;
+    const ctx = this._ensureCtx();
+    const now = ctx.currentTime;
+    this._worshipGain = ctx.createGain();
+    this._worshipGain.gain.setValueAtTime(0, now);
+    this._worshipGain.gain.linearRampToValueAtTime(0.15, now + 1);
+    this._worshipGain.connect(ctx.destination);
+
+    const freqs = [98.00, 130.81, 196.00, 246.94, 293.66];
+    freqs.forEach(f => {
+      for (let detune of [-8, 0, 8]) {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(f, now);
+        osc.detune.setValueAtTime(detune, now);
+        gain.gain.setValueAtTime(0.25 / freqs.length / 3, now);
+        const lfo = ctx.createOscillator();
+        const lfoGain = ctx.createGain();
+        lfo.frequency.setValueAtTime(0.15 + Math.random() * 0.15, now);
+        lfoGain.gain.setValueAtTime(0.6, now);
+        lfo.connect(lfoGain).connect(gain.gain);
+        osc.connect(gain).connect(this._worshipGain);
+        osc.start(now);
+        lfo.start(now);
+        this._worshipNodes.push({ osc, gain, lfo, lfoGain });
+      }
+    });
+  },
+
+  stopWorshipChoir() {
+    this._worshipNodes.forEach(n => {
+      try { n.osc.stop(); n.lfo.stop(); } catch(e) {}
+    });
+    this._worshipNodes = [];
+    if (this._worshipGain) {
+      this._worshipGain.gain.linearRampToValueAtTime(0, this.ctx.currentTime + 0.5);
+      setTimeout(() => { try { this._worshipGain.disconnect(); } catch(e) {} }, 600);
+    }
+  },
+
+  confettiPop() {
+    const ctx = this._ensureCtx();
+    const buf = ctx.createBuffer(1, ctx.sampleRate * 0.1, ctx.sampleRate);
+    const d = buf.getChannelData(0);
+    for (let i = 0; i < d.length; i++) d[i] = (Math.random() * 2 - 1) * Math.exp(-i / (ctx.sampleRate * 0.02));
+    const src = ctx.createBufferSource();
+    src.buffer = buf;
+    const gain = ctx.createGain();
+    gain.gain.setValueAtTime(0.3, ctx.currentTime);
+    gain.gain.linearRampToValueAtTime(0, ctx.currentTime + 0.1);
+    src.connect(gain).connect(ctx.destination);
+    src.start();
+  },
+
+  whisperBack() {
+    if ('speechSynthesis' in window) {
+      const u = new SpeechSynthesisUtterance('I will be back');
+      u.rate = 0.5;
+      u.pitch = 0.3;
+      u.volume = 0.6;
+      speechSynthesis.cancel();
+      speechSynthesis.speak(u);
+    }
+  },
+};
+
+// ─── CANVAS PARTICLE SYSTEM ──────────────────────────────────────────────────
+class ParticleSystem {
+  constructor(canvas, opts = {}) {
+    this.canvas = canvas;
+    this.ctx = canvas.getContext('2d');
+    this.particles = [];
+    this.opts = Object.assign({
+      count: 100, colors: ['#d4af37', '#f0d060', '#ffffff', '#ffd700'],
+      size: [2, 6], speed: [0.2, 1], life: [60, 180], gravity: 0,
+      repulsionRadius: 80, repulsionForce: 8,
+    }, opts);
+    this.running = false;
+    this.mouse = { x: -9999, y: -9999 };
+    this._resize();
+    this._onMouse = e => { this.mouse.x = e.clientX; this.mouse.y = e.clientY; };
+    window.addEventListener('mousemove', this._onMouse);
+  }
+
+  _resize() {
+    this.canvas.width = this.canvas.offsetWidth || window.innerWidth;
+    this.canvas.height = this.canvas.offsetHeight || window.innerHeight;
+  }
+
+  emit(x, y, count, opts = {}) {
+    for (let i = 0; i < count; i++) {
+      const angle = Math.random() * Math.PI * 2;
+      const speed = (opts.speed || this.opts.speed)[0] + Math.random() * ((opts.speed || this.opts.speed)[1] || 1);
+      this.particles.push({
+        x: x || Math.random() * this.canvas.width,
+        y: y || Math.random() * this.canvas.height,
+        vx: Math.cos(angle) * speed,
+        vy: Math.sin(angle) * speed - (opts.gravity != null ? opts.gravity : this.opts.gravity),
+        size: ((opts.size || this.opts.size)[0] || 2) + Math.random() * ((opts.size || this.opts.size)[1] || 4),
+        color: (opts.colors || this.opts.colors)[Math.floor(Math.random() * (opts.colors || this.opts.colors).length)],
+        life: ((opts.life || this.opts.life)[0] || 60) + Math.random() * ((opts.life || this.opts.life)[1] || 120),
+        maxLife: ((opts.life || this.opts.life)[0] || 60) + Math.random() * ((opts.life || this.opts.life)[1] || 120),
+        alpha: 1,
+      });
+    }
+  }
+
+  update() {
+    this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    const w = this.canvas.width, h = this.canvas.height;
+    for (let i = this.particles.length - 1; i >= 0; i--) {
+      const p = this.particles[i];
+      const dx = p.x - this.mouse.x;
+      const dy = p.y - this.mouse.y;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      if (dist < this.opts.repulsionRadius && dist > 0) {
+        const force = (this.opts.repulsionRadius - dist) / this.opts.repulsionRadius * this.opts.repulsionForce;
+        p.vx += (dx / dist) * force;
+        p.vy += (dy / dist) * force;
+      }
+      p.vx *= 0.98;
+      p.vy *= 0.98;
+      p.vy += this.opts.gravity;
+      p.x += p.vx;
+      p.y += p.vy;
+      p.life--;
+      p.alpha = Math.max(0, p.life / p.maxLife);
+      if (p.life <= 0) { this.particles.splice(i, 1); continue; }
+      this.ctx.globalAlpha = p.alpha;
+      this.ctx.fillStyle = p.color;
+      this.ctx.beginPath();
+      this.ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+      this.ctx.fill();
+    }
+    this.ctx.globalAlpha = 1;
+    if (this.running) requestAnimationFrame(() => this.update());
+  }
+
+  start() { this.running = true; this.update(); }
+  stop() { this.running = false; }
+  destroy() { this.stop(); window.removeEventListener('mousemove', this._onMouse); }
+}
+
+// ─── COMPLIMENT ENGINE ───────────────────────────────────────────────────────
+const ComplimentEngine = {
+  templates: [
+    'You are the [adjective] [noun] to my [noun2].',
+    'Your [bodyPart] has the [quality] of a [mythicalCreature].',
+    'Your [abstractQuality] has cured my [disease].',
+    'Scientists remain unable to explain your level of [abstractQuality].',
+    'You have the [bodyPart] of a [mythicalCreature] and the [noun] of a [profession].',
+    'If greatness were [measurableUnit], you would be [hugeNumber].',
+    'Your [noun] has caused worldwide [positiveEvent].',
+    "They said it couldn't be done, but you [impossibleAction].",
+  ],
+  buckets: {
+    adjective: ['radiant', 'impossibly luminous', 'quantumly supreme', 'dangerously cuddly', 'magnificent', 'eternal', 'glorious', 'cosmic', 'legendary', 'flawless'],
+    noun: ['lighthouse', 'burrito', 'algorithm', 'sonnet', 'miracle', 'champion', 'wifi signal', 'debugger', 'coffee cup', 'supernova'],
+    noun2: ['my existence', 'my codebase', 'my soul', 'the universe', 'my bugs', 'my Monday mornings'],
+    bodyPart: ['left eyebrow', 'typing fingers', 'brain wrinkles', 'aura', 'smile', 'posture'],
+    quality: ['brilliance', 'composure', 'radiance', 'perfection', 'sheer willpower'],
+    mythicalCreature: ['phoenix', 'dragon', 'unicorn', 'griffin', 'thunderbird'],
+    abstractQuality: ['patience', 'Wi-Fi signal strength', 'code elegance', 'modesty (in theory)', 'snack selection skills'],
+    disease: ['existential dread', 'buffering', 'slow internet', 'sadness', 'imposter syndrome', 'runtime errors'],
+    measurableUnit: ['joules', 'lines of code', 'stars in the galaxy', 'npm packages', 'cups of coffee'],
+    hugeNumber: ['infinity', 'at least 7', 'over 9000', 'a number so large it needs its own data type'],
+    positiveEvent: ['peace', 'confetti rain', 'a standing ovation from compilers', 'the invention of a new dance'],
+    impossibleAction: ['centered a div on the first try', 'made CSS work without crying', 'wrote a function with no side effects'],
+    profession: ['rockstar', 'wizard', 'CEO of the Internet', 'mythical 10x engineer'],
+  },
+  recent: [],
+
+  generate() {
+    let template = this.templates[Math.floor(Math.random() * this.templates.length)];
+    let result = template.replace(/\[(\w+)\]/g, (_, key) => {
+      const arr = this.buckets[key];
+      if (!arr) return `[${key}]`;
+      let word;
+      let attempts = 0;
+      do {
+        word = arr[Math.floor(Math.random() * arr.length)];
+        attempts++;
+      } while (this.recent.includes(word) && attempts < 10);
+      return word;
+    });
+    this.recent.push(result);
+    if (this.recent.length > 20) this.recent.shift();
+    return result;
+  }
+};
+
+// ─── THREE.JS HELPERS ────────────────────────────────────────────────────────
+function createThreeScene(container, bg = 0x050508) {
+  const w = container.clientWidth;
+  const h = container.clientHeight;
+  const scene = new THREE.Scene();
+  scene.background = new THREE.Color(bg);
+  const camera = new THREE.PerspectiveCamera(60, w / h, 0.1, 1000);
+  camera.position.set(0, 2, 8);
+  const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+  renderer.setSize(w, h);
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer.shadowMap.enabled = true;
+  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  container.appendChild(renderer.domElement);
+
+  const onResize = () => {
+    const w2 = container.clientWidth;
+    const h2 = container.clientHeight;
+    camera.aspect = w2 / h2;
+    camera.updateProjectionMatrix();
+    renderer.setSize(w2, h2);
+  };
+  window.addEventListener('resize', onResize);
+
+  return { scene, camera, renderer, onResize };
+}
+
+function destroyThreeScene(three, container) {
+  if (!three) return;
+  window.removeEventListener('resize', three.onResize);
+  if (three.renderer) {
+    three.renderer.dispose();
+    if (three.renderer.domElement && three.renderer.domElement.parentNode) {
+      three.renderer.domElement.parentNode.removeChild(three.renderer.domElement);
+    }
+  }
+  three.scene = null;
+  three.camera = null;
+  three.renderer = null;
+}
+
+// ─── ROUTER ──────────────────────────────────────────────────────────────────
+const Router = {
+  routes: {},
+  current: null,
+
+  register(hash, fn) { this.routes[hash] = fn; },
+
+  navigate(hash) {
+    window.location.hash = hash;
+  },
+
+  init() {
+    const handler = () => {
+      const hash = window.location.hash || '#/';
+      this._go(hash);
+    };
+    window.addEventListener('hashchange', handler);
+    handler();
+  },
+
+  _go(hash) {
+    const prev = this.current;
+    if (prev && this.routes[prev] && this.routes[prev].destroy) {
+      this.routes[prev].destroy();
+    }
+    document.querySelectorAll('.wing.active').forEach(el => el.classList.remove('active'));
+    this.current = hash;
+    const route = this.routes[hash];
+    if (route) {
+      const wingId = route.wingId;
+      if (wingId !== undefined) {
+        const el = document.querySelector(`[data-wing="${wingId}"]`);
+        if (el) el.classList.add('active');
+        State.visitWing(wingId);
+      }
+      if (route.init) route.init();
+    }
+  }
+};
+
+// ─── GLOBAL CONFETTI ─────────────────────────────────────────────────────────
+const globalConfetti = {
+  canvas: document.getElementById('confettiCanvas'),
+  particles: [],
+  running: false,
+  init() {
+    this.ctx = this.canvas.getContext('2d');
+    this._resize();
+    window.addEventListener('resize', () => this._resize());
+  },
+  _resize() {
+    this.canvas.width = window.innerWidth;
+    this.canvas.height = window.innerHeight;
+  },
+  burst(x, y, count = 100) {
+    const cx = x != null ? x : this.canvas.width / 2;
+    const cy = y != null ? y : this.canvas.height / 2;
+    for (let i = 0; i < count; i++) {
+      const angle = Math.random() * Math.PI * 2;
+      const speed = 2 + Math.random() * 6;
+      this.particles.push({
+        x: cx, y: cy,
+        vx: Math.cos(angle) * speed,
+        vy: Math.sin(angle) * speed - 2,
+        size: 3 + Math.random() * 5,
+        color: ['#d4af37','#f0d060','#ffd700','#ffffff','#ff6b6b','#60a5fa'][Math.floor(Math.random() * 6)],
+        life: 60 + Math.random() * 60,
+        maxLife: 120,
+        rot: Math.random() * Math.PI * 2,
+        rotV: (Math.random() - 0.5) * 0.2,
+      });
+    }
+    if (!this.running) { this.running = true; this._loop(); }
+    Sound.confettiPop();
+  },
+  _loop() {
+    this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    for (let i = this.particles.length - 1; i >= 0; i--) {
+      const p = this.particles[i];
+      p.x += p.vx;
+      p.y += p.vy;
+      p.vy += 0.05;
+      p.rot += p.rotV;
+      p.life--;
+      if (p.life <= 0) { this.particles.splice(i, 1); continue; }
+      const alpha = Math.max(0, p.life / p.maxLife);
+      this.ctx.save();
+      this.ctx.translate(p.x, p.y);
+      this.ctx.rotate(p.rot);
+      this.ctx.globalAlpha = alpha;
+      this.ctx.fillStyle = p.color;
+      this.ctx.fillRect(-p.size / 2, -p.size / 4, p.size, p.size / 2);
+      this.ctx.restore();
+    }
+    this.ctx.globalAlpha = 1;
+    if (this.particles.length) requestAnimationFrame(() => this._loop());
+    else this.running = false;
+  }
+};
+
+// ─── WING INITIALIZERS ──────────────────────────────────────────────────────
+
+// Wing 0: Warning
+Router.register('#/', {
+  wingId: 0,
+  init() {
+    document.getElementById('enterWarning').onclick = () => {
+      Router.navigate('#/preloader');
+    };
+  }
+});
+
+// Wing 1: Preloader
+Router.register('#/preloader', {
+  wingId: 1,
+  _ps: null,
+  init() {
+    const canvas = document.getElementById('preloaderCanvas');
+    this._ps = new ParticleSystem(canvas, {
+      count: 0, colors: ['#d4af37','#f0d060','#ffffff','#4ade80','#60a5fa'],
+      repulsionRadius: 120, repulsionForce: 12,
+    });
+    this._ps.start();
+    const fill = document.getElementById('preloaderFill');
+    const label = document.getElementById('preloaderLabel');
+    let pct = 0;
+    const words = ['<div>', '{', 'const', 'malloc', '=>', 'async', 'await', '</>', 'try', 'catch'];
+    const emitLoop = setInterval(() => {
+      this._ps.emit(Math.random() * canvas.width, Math.random() * canvas.height, 2 + Math.random() * 3, {
+        colors: ['#d4af37','#f0d060','#ffffff','#4ade80','#60a5fa'],
+        size: [1, 4], life: [40, 100], speed: [0.1, 0.5],
+      });
+    }, 200);
+    const interval = setInterval(() => {
+      pct += 2 + Math.random() * 5;
+      if (pct >= 100) {
+        pct = 100;
+        clearInterval(interval);
+        clearInterval(emitLoop);
+        Sound.bootUp();
+        setTimeout(() => {
+          if (this._ps) this._ps.destroy();
+          Router.navigate('#/great-hall');
+        }, 600);
+      }
+      fill.style.width = pct + '%';
+      label.textContent = `Initializing Greatness... ${Math.floor(pct)}%`;
+    }, 80);
+    this._cleanup = () => { clearInterval(interval); clearInterval(emitLoop); if (this._ps) this._ps.destroy(); };
+  },
+  destroy() { if (this._cleanup) this._cleanup(); }
+});
+
+// Wing 2: Great Hall
+Router.register('#/great-hall', {
+  wingId: 2,
+  three: null,
+  particles: null,
+  init() {
+    const container = document.getElementById('greatHallThree');
+    this.three = createThreeScene(container, 0x050508);
+    const { scene, camera, renderer } = this.three;
+
+    const ambient = new THREE.AmbientLight(0x222244, 0.5);
+    scene.add(ambient);
+
+    const spot = new THREE.SpotLight(0xffd700, 3, 20, Math.PI / 6, 0.5, 1);
+    spot.position.set(0, 8, 0);
+    spot.target.position.set(0, 0, 0);
+    scene.add(spot);
+    scene.add(spot.target);
+    this._spot = spot;
+
+    const fill = new THREE.DirectionalLight(0xffd700, 0.3);
+    fill.position.set(-2, 3, 4);
+    scene.add(fill);
+
+    const floor = new THREE.Mesh(
+      new THREE.PlaneGeometry(20, 20),
+      new THREE.MeshStandardMaterial({ color: 0x111118, metalness: 0.8, roughness: 0.3 })
+    );
+    floor.rotation.x = -Math.PI / 2;
+    floor.position.y = -1;
+    floor.receiveShadow = true;
+    scene.add(floor);
+
+    const goldMat = new THREE.MeshStandardMaterial({ color: 0xd4af37, metalness: 1, roughness: 0.3, emissive: 0x332200, emissiveIntensity: 0.1 });
+    const group = new THREE.Group();
+
+    const head = new THREE.Mesh(new THREE.SphereGeometry(0.5, 16, 16), goldMat);
+    head.position.y = 1.2;
+    group.add(head);
+
+    const body = new THREE.Mesh(new THREE.CylinderGeometry(0.6, 0.8, 1.2, 8), goldMat);
+    body.position.y = 0.2;
+    group.add(body);
+
+    const crown = new THREE.Mesh(new THREE.CylinderGeometry(0.7, 0.7, 0.2, 12), goldMat);
+    crown.position.y = 1.55;
+    group.add(crown);
+    const crown2 = new THREE.Mesh(new THREE.CylinderGeometry(0.5, 0.6, 0.15, 8), goldMat);
+    crown2.position.y = 1.45;
+    group.add(crown2);
+
+    const armL = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.15, 0.6, 6), goldMat);
+    armL.position.set(-0.7, 0.7, 0);
+    armL.rotation.z = 0.3;
+    group.add(armL);
+    const armR = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.15, 0.6, 6), goldMat);
+    armR.position.set(0.7, 0.7, 0);
+    armR.rotation.z = -0.3;
+    group.add(armR);
+
+    group.position.y = 0;
+    scene.add(group);
+    this._statue = group;
+
+    this._particles = [];
+    for (let i = 0; i < 150; i++) {
+      const size = 0.02 + Math.random() * 0.04;
+      const geo = new THREE.PlaneGeometry(size, size);
+      const mat = new THREE.MeshBasicMaterial({
+        color: ['#d4af37','#f0d060','#ffd700','#ffffff'][Math.floor(Math.random() * 4)],
+        transparent: true, opacity: 0.6 + Math.random() * 0.4,
+        side: THREE.DoubleSide,
+      });
+      const mesh = new THREE.Mesh(geo, mat);
+      const r = 2 + Math.random() * 3;
+      const theta = Math.random() * Math.PI * 2;
+      const phi = Math.random() * Math.PI;
+      mesh.position.set(r * Math.sin(phi) * Math.cos(theta), Math.random() * 3 - 0.5, r * Math.cos(phi) * Math.cos(theta));
+      mesh.userData = { r, theta, phi, speed: 0.003 + Math.random() * 0.005, rotSpeed: (Math.random() - 0.5) * 0.02 };
+      scene.add(mesh);
+      this._particles.push(mesh);
+    }
+
+    const onMouse = (e) => {
+      const rect = renderer.domElement.getBoundingClientRect();
+      const x = (e.clientX - rect.left) / rect.width * 2 - 1;
+      const y = -(e.clientY - rect.top) / rect.height * 2 + 1;
+      this._spot.position.x = x * 4;
+      this._spot.position.z = y * 3;
+    };
+    window.addEventListener('mousemove', onMouse);
+    this._mouseCleanup = () => window.removeEventListener('mousemove', onMouse);
+
+    let time = 0;
+    const animate = () => {
+      if (!this.three) return;
+      time += 0.01;
+      group.rotation.y += 0.002;
+      this._particles.forEach(p => {
+        p.material.rotation += p.userData.rotSpeed;
+        p.userData.theta += p.userData.speed;
+        const r = p.userData.r;
+        const theta = p.userData.theta;
+        p.position.x = r * Math.sin(theta) * Math.cos(time * 0.1);
+        p.position.z = r * Math.cos(theta) * Math.cos(time * 0.1);
+        p.position.y += Math.sin(time + p.userData.phi) * 0.003;
+      });
+      renderer.render(scene, camera);
+      this._animId = requestAnimationFrame(animate);
+    };
+    animate();
+
+    Sound.startChoir();
+
+    document.getElementById('enterSanctuary').onclick = () => {
+      document.getElementById('enterSanctuary').style.pointerEvents = 'none';
+      gsap.to(container, { scale: 1.1, opacity: 0, duration: 0.8, ease: 'power2.in', onComplete: () => {
+        Router.navigate('#/dashboard');
+      }});
+      globalConfetti.burst(window.innerWidth / 2, window.innerHeight / 2, 200);
+    };
+  },
+  destroy() {
+    if (this._mouseCleanup) this._mouseCleanup();
+    if (this._animId) cancelAnimationFrame(this._animId);
+    this._particles = [];
+    Sound.stopChoir();
+    const container = document.getElementById('greatHallThree');
+    if (container) container.style.scale = '1'; container.style.opacity = '1';
+    destroyThreeScene(this.three, container);
+    this.three = null;
+  }
+});
+
+// Wing 3: Dashboard
+Router.register('#/dashboard', {
+  wingId: 3,
+  _intervals: [],
+  _terminalLines: [],
+  init() {
+    const terminalFeed = document.getElementById('terminalFeed');
+    const msgs = [
+      { text: 'Exceeded maximum human capacity.', type: 'success' },
+      { text: 'Intellect levels bypassing local grid constraints.', type: 'warning' },
+      { text: 'Charm quotient index overflow.', type: 'info' },
+      { text: 'Humility module not found.', type: 'error' },
+      { text: 'Awesomeness buffer exceeded. Reallocating.', type: 'info' },
+      { text: 'Confidence compiler: optimization complete.', type: 'success' },
+      { text: 'Ego core temperature: optimal.', type: 'info' },
+      { text: 'Self-doubt garbage collector ran 0 cycles.', type: 'warning' },
+    ];
+    const awards = [
+      '🏆 World\'s Best Tab Opener', '🏆 Survived npm install', '🏆 Professional Googler',
+      '🏆 Most Likely To Say \'One More Feature\'', '🏆 Certified Keyboard Warrior',
+      '🏆 Gold Medal in Procrastination (eventually)', '🏆 Master of the Infinite Loop',
+      '🏆 Senior Vice President of Coffee Consumption',
+    ];
+
+    const terminalInterval = setInterval(() => {
+      const m = msgs[Math.floor(Math.random() * msgs.length)];
+      const line = document.createElement('div');
+      line.className = `line ${m.type}`;
+      const time = new Date().toLocaleTimeString();
+      line.textContent = `[${time}] [${m.type.toUpperCase()}] ${m.text}`;
+      terminalFeed.appendChild(line);
+      terminalFeed.scrollTop = terminalFeed.scrollHeight;
+      if (terminalFeed.children.length > 50) terminalFeed.removeChild(terminalFeed.firstChild);
+    }, 800 + Math.random() * 600);
+    this._intervals.push(terminalInterval);
+
+    const awardsInterval = setInterval(() => {
+      const area = document.getElementById('awardsArea');
+      const el = document.createElement('div');
+      el.className = 'award-pop';
+      el.textContent = awards[Math.floor(Math.random() * awards.length)];
+      area.appendChild(el);
+      gsap.from(el, { y: 20, opacity: 0, scale: 0.5, duration: 0.4, ease: 'back.out(2)' });
+      setTimeout(() => {
+        gsap.to(el, { opacity: 0, y: -10, duration: 0.5, onComplete: () => el.remove() });
+      }, 3000);
+    }, 3000 + Math.random() * 2000);
+    this._intervals.push(awardsInterval);
+
+    const praiseInterval = setInterval(() => {
+      State.addPraise();
+      document.getElementById('praiseCounter').textContent = State.praiseCount.toLocaleString();
+    }, 3000 + Math.random() * 2000);
+    this._intervals.push(praiseInterval);
+
+    let points = [];
+    for (let i = 0; i < 50; i++) points.push(60 + Math.random() * 40 - 20);
+    const brainwavePath = document.getElementById('brainwavePath');
+    const brainwaveInterval = setInterval(() => {
+      points.shift();
+      points.push(60 + Math.random() * 40 - 20);
+      const d = 'M0 60 ' + points.map((v, i) => `L${(i + 1) / points.length * 400} ${v}`).join(' ');
+      brainwavePath.setAttribute('d', d);
+    }, 300);
+    this._intervals.push(brainwaveInterval);
+
+    const circ = document.getElementById('confidenceCircle');
+    const circLen = 2 * Math.PI * 40;
+    circ.style.strokeDasharray = circLen;
+    const offset = circLen - (127 / 100) * circLen;
+    circ.style.strokeDashoffset = offset;
+
+    headerNavHighlight('#/dashboard');
+  },
+  destroy() {
+    this._intervals.forEach(clearInterval);
+    this._intervals = [];
+  }
+});
+
+// Wing 4: Praise
+Router.register('#/praise', {
+  wingId: 4,
+  _timeout: null,
+  _currentText: '',
+  init() {
+    this._showPraise();
+    document.getElementById('regeneratePraise').onclick = () => {
+      if (this._timeout) clearTimeout(this._timeout);
+      this._showPraise();
+    };
+    headerNavHighlight('#/praise');
+  },
+  _showPraise() {
+    const display = document.getElementById('praiseDisplay');
+    display.innerHTML = '';
+    const text = ComplimentEngine.generate();
+    this._currentText = text;
+    const chars = text.split('');
+    display.textContent = '';
+    let i = 0;
+    const typeInterval = setInterval(() => {
+      if (i >= chars.length) {
+        clearInterval(typeInterval);
+        globalConfetti.burst(
+          display.getBoundingClientRect().left + display.offsetWidth / 2,
+          display.getBoundingClientRect().top + display.offsetHeight / 2,
+          30
+        );
+        this._timeout = setTimeout(() => this._showPraise(), 8000);
+        return;
+      }
+      const span = document.createElement('span');
+      span.className = 'char';
+      span.textContent = chars[i];
+      display.appendChild(span);
+      i++;
+    }, 25);
+  },
+  destroy() {
+    if (this._timeout) clearTimeout(this._timeout);
+  }
+});
+
+// Wing 5: Testimonials
+Router.register('#/testimonials', {
+  wingId: 5,
+  three: null,
+  css2d: null,
+  _cubes: [],
+  _focused: null,
+  _animId: null,
+  init() {
+    const container = document.getElementById('testimonialsThree');
+    this.three = createThreeScene(container, 0x050510);
+    const { scene, camera, renderer } = this.three;
+
+    this.css2d = new CSS2DRenderer();
+    this.css2d.setSize(container.clientWidth, container.clientHeight);
+    this.css2d.domElement.style.position = 'absolute';
+    this.css2d.domElement.style.top = '0';
+    this.css2d.domElement.style.pointerEvents = 'none';
+    container.appendChild(this.css2d.domElement);
+
+    const resize2d = () => {
+      const w = container.clientWidth;
+      const h = container.clientHeight;
+      this.css2d.setSize(w, h);
+    };
+    window.addEventListener('resize', resize2d);
+    this._resize2d = resize2d;
+
+    const starGeo = new THREE.BufferGeometry();
+    const starCount = 1000;
+    const starPos = new Float32Array(starCount * 3);
+    for (let i = 0; i < starCount * 3; i++) starPos[i] = (Math.random() - 0.5) * 100;
+    starGeo.setAttribute('position', new THREE.BufferAttribute(starPos, 3));
+    const starMat = new THREE.PointsMaterial({ color: 0x666688, size: 0.05, transparent: true, opacity: 0.6 });
+    const stars = new THREE.Points(starGeo, starMat);
+    scene.add(stars);
+
+    const amber = new THREE.AmbientLight(0x222244, 0.3);
+    scene.add(amber);
+    const dirLight = new THREE.DirectionalLight(0xd4af37, 0.6);
+    dirLight.position.set(2, 5, 3);
+    scene.add(dirLight);
+
+    const testimonials = [
+      'Ever since I witnessed your miracle, my life has had meaning.',
+      'I once saw you write code, and I\'ve never been the same.',
+      'Your aura cured my existential dread from across the room.',
+      'I didn\'t know him personally, but I support whatever is happening.',
+      'His code compiled before he wrote it.',
+      'Your debugger has the brilliance of a phoenix.',
+      'If greatness were joules, you would be infinity.',
+      'Your algorithm has caused worldwide peace.',
+      'They said it couldn\'t be done, but you centered a div on the first try.',
+      'Your left eyebrow has the perfection of a unicorn.',
+      'Scientists remain unable to explain your level of code elegance.',
+      'Your smile has the composure of a griffin.',
+      'You are the radiant champion to my existence.',
+      'Your brain wrinkles have the radiance of a thunderbird.',
+      'Your snack selection skills have cured my sadness.',
+    ];
+    const names = [];
+    const syllables = ['Xel','vi','ra','Blorp','Mc','Kra','ken','Jane','Dough','Zar','quon','Flim','flam','Tor','vik','Sha','na','Qui','xel','Mor','pheus'];
+    for (let i = 0; i < testimonials.length; i++) {
+      let name = '';
+      for (let j = 0; j < 2 + Math.floor(Math.random() * 2); j++) name += syllables[Math.floor(Math.random() * syllables.length)];
+      name += ' ' + String.fromCharCode(65 + Math.floor(Math.random() * 26)) + '.';
+      names.push(name);
+    }
+
+    const cubeMat = new THREE.MeshStandardMaterial({
+      color: 0xd4af37, metalness: 0.8, roughness: 0.2, transparent: true, opacity: 0.85,
+      emissive: 0x332200, emissiveIntensity: 0.05,
+    });
+    const positions = [];
+    const spacing = 4;
+    const cols = 5;
+    for (let i = 0; i < testimonials.length; i++) {
+      const col = i % cols;
+      const row = Math.floor(i / cols);
+      const x = (col - cols / 2) * spacing;
+      const z = row * spacing - 4;
+      const y = Math.sin(i) * 1;
+      positions.push({ x, y, z });
+    }
+
+    const raycaster = new THREE.Raycaster();
+    const mouse = new THREE.Vector2();
+
+    testimonials.forEach((text, i) => {
+      const geo = new THREE.BoxGeometry(0.8, 0.8, 0.8);
+      const mesh = new THREE.Mesh(geo, cubeMat.clone());
+      const pos = positions[i];
+      mesh.position.set(pos.x, pos.y, pos.z);
+      mesh.userData = { baseY: pos.y, speed: 0.3 + Math.random() * 0.3, phase: Math.random() * Math.PI * 2, text, name: names[i] };
+      scene.add(mesh);
+      this._cubes.push(mesh);
+
+      const label = document.createElement('div');
+      label.style.color = '#d4af37';
+      label.style.fontSize = '10px';
+      label.style.fontFamily = 'system-ui, sans-serif';
+      label.style.textAlign = 'center';
+      label.style.width = '160px';
+      label.style.padding = '8px';
+      label.style.background = 'rgba(0,0,0,0.8)';
+      label.style.border = '1px solid rgba(212,175,55,0.3)';
+      label.style.borderRadius = '6px';
+      label.style.pointerEvents = 'none';
+      label.style.opacity = '0';
+      label.style.transition = 'opacity 0.3s';
+      label.innerHTML = `<strong style="color:#f0d060;">${names[i]}</strong><br><span style="color:#ccc;font-size:9px;">${text}</span>`;
+      const labelObj = new CSS2DObject(label);
+      labelObj.position.set(pos.x, pos.y - 1.2, pos.z);
+      scene.add(labelObj);
+      mesh.userData.labelObj = labelObj;
+    });
+
+    const onClick = (e) => {
+      const rect = renderer.domElement.getBoundingClientRect();
+      mouse.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+      mouse.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+      raycaster.setFromCamera(mouse, camera);
+      const intersects = raycaster.intersectObjects(this._cubes);
+      if (intersects.length) {
+        const hit = intersects[0].object;
+        if (this._focused === hit) {
+          gsap.to(camera.position, { x: 0, y: 2, z: 8, duration: 0.6, ease: 'power2.out' });
+          gsap.to(hit.material, { emissiveIntensity: 0.05, duration: 0.3 });
+          hit.userData.labelObj.element.style.opacity = '0';
+          this._focused = null;
+        } else {
+          const p = hit.position;
+          gsap.to(camera.position, { x: p.x * 0.5, y: p.y + 1, z: p.z + 2.5, duration: 0.6, ease: 'power2.out' });
+          if (this._focused) {
+            this._focused.userData.labelObj.element.style.opacity = '0';
+            gsap.to(this._focused.material, { emissiveIntensity: 0.05, duration: 0.3 });
+          }
+          gsap.to(hit.material, { emissiveIntensity: 0.3, duration: 0.3 });
+          hit.userData.labelObj.element.style.opacity = '1';
+          this._focused = hit;
+        }
+      }
+    };
+    renderer.domElement.addEventListener('click', onClick);
+    this._clickCleanup = () => renderer.domElement.removeEventListener('click', onClick);
+
+    const animate = () => {
+      if (!this.three) return;
+      this._cubes.forEach(m => {
+        m.rotation.x += 0.005;
+        m.rotation.y += 0.01;
+        m.position.y = m.userData.baseY + Math.sin(Date.now() * 0.001 * m.userData.speed + m.userData.phase) * 0.3;
+      });
+      stars.rotation.y += 0.0002;
+      renderer.render(scene, camera);
+      this.css2d.render(scene, camera);
+      this._animId = requestAnimationFrame(animate);
+    };
+    animate();
+    headerNavHighlight('#/testimonials');
+  },
+  destroy() {
+    if (this._animId) cancelAnimationFrame(this._animId);
+    if (this._clickCleanup) this._clickCleanup();
+    this._cubes = [];
+    this._focused = null;
+    if (this._resize2d) window.removeEventListener('resize', this._resize2d);
+    const container = document.getElementById('testimonialsThree');
+    if (this.css2d) {
+      this.css2d.domElement.remove();
+      this.css2d = null;
+    }
+    destroyThreeScene(this.three, container);
+    this.three = null;
+  }
+});
+
+// Wing 6: Timeline
+Router.register('#/timeline', {
+  wingId: 6,
+  init() {
+    const track = document.getElementById('timelineTrack');
+    track.innerHTML = '';
+
+    const hardcoded = [
+      { year: '2004', desc: 'The universe prepares.', sub: 'Cosmic alignment: nominal' },
+      { year: '2010', desc: 'Discovers computers.', sub: 'A legend begins to compile' },
+      { year: '2026', desc: 'Still trying to center a div.', sub: 'The eternal struggle' },
+      { year: 'Future', desc: 'To be continued...', sub: 'Infinity awaits' },
+    ];
+
+    const actions = ['was born', 'made toast', 'first console.log', 'opened a tab', 'installed a package', 'wrote a for loop'];
+    const consequences = ['The universe recalibrated its standards.', 'Toasters everywhere wept in gratitude.', 'The browser console applauded.', 'The internet became 12% more powerful.', 'A new era of bugs began.'];
+
+    const allEntries = [...hardcoded];
+    for (let i = 0; i < 6; i++) {
+      const year = 2011 + Math.floor(Math.random() * 14);
+      const action = actions[Math.floor(Math.random() * actions.length)];
+      const cons = consequences[Math.floor(Math.random() * consequences.length)];
+      allEntries.push({ year: String(year), desc: `${action.charAt(0).toUpperCase() + action.slice(1)} — ${cons}`, sub: '' });
+    }
+
+    allEntries.sort((a, b) => {
+      if (a.year === 'Future') return 1;
+      if (b.year === 'Future') return -1;
+      return parseInt(a.year) - parseInt(b.year);
+    });
+
+    allEntries.forEach(entry => {
+      const div = document.createElement('div');
+      div.className = 'timeline-entry';
+      div.innerHTML = `<div class="year">${entry.year}</div><div class="desc">${entry.desc}</div>${entry.sub ? `<div class="sub">${entry.sub}</div>` : ''}`;
+      track.appendChild(div);
+    });
+
+    document.getElementById('addTimelineEntry').onclick = () => {
+      const now = new Date();
+      const timeStr = now.toLocaleString();
+      const action = actions[Math.floor(Math.random() * actions.length)];
+      const cons = consequences[Math.floor(Math.random() * consequences.length)];
+      const div = document.createElement('div');
+      div.className = 'timeline-entry';
+      div.innerHTML = `<div class="year">${timeStr}</div><div class="desc">You clicked a button. ${action.charAt(0).toUpperCase() + action.slice(1)} — ${cons}</div><div class="sub">Time itself paused to applaud.</div>`;
+      track.appendChild(div);
+      gsap.from(div, { opacity: 0, x: -50, duration: 0.5, ease: 'power2.out' });
+      setTimeout(() => { div.scrollIntoView({ behavior: 'smooth', inline: 'center' }); }, 100);
+    };
+
+    headerNavHighlight('#/timeline');
+  },
+  destroy() {}
+});
+
+// Wing 7: Museum
+Router.register('#/museum', {
+  wingId: 7,
+  three: null,
+  _relics: [],
+  _currentRelic: null,
+  _animId: null,
+  _keys: { left: false, right: false },
+  _cameraTarget: 0,
+  _glitchActive: false,
+
+  init() {
+    const container = document.getElementById('museumThree');
+    this.three = createThreeScene(container, 0x050510);
+    const { scene, camera, renderer } = this.three;
+    camera.position.set(0, 2, 10);
+
+    const fixed = [
+      { name: 'The Keyboard', desc: 'Allegedly wrote code so clean the compiler applauded.', color: 0xd4af37, shape: 'box' },
+      { name: 'The Chair', desc: 'Supported history in the making.', color: 0x886644, shape: 'cylinder' },
+      { name: 'The Coffee Cup', desc: 'Empty. Dreams were caffeinated instead.', color: 0x664422, shape: 'cone' },
+    ];
+    const adj = ['Golden', 'Mythical', 'Singular', 'Original', 'Quantum', 'Sacred'];
+    const objects = ['USB Cable', 'Mouse Pad', 'Sticky Note', 'Rubber Duck', 'Ethernet Cable', 'Post-it'];
+    const verbs = ['Connected', 'Inspired', 'Debugged', 'Compiled', 'Held'];
+    const nouns = ['destiny', 'first hello world', 'entire career', 'greatest ideas', 'codebase'];
+    const generated = [];
+    for (let i = 0; i < 7; i++) {
+      generated.push({
+        name: `The ${adj[Math.floor(Math.random() * adj.length)]} ${objects[Math.floor(Math.random() * objects.length)]}`,
+        desc: `That ${verbs[Math.floor(Math.random() * verbs.length)]} your ${nouns[Math.floor(Math.random() * nouns.length)]}.`,
+        color: [0xd4af37, 0x88aaff, 0xff8866, 0x66cc88][Math.floor(Math.random() * 4)],
+        shape: ['box', 'sphere', 'cylinder'][Math.floor(Math.random() * 3)],
+      });
+    }
+    this._relics = [...fixed, ...generated];
+
+    const amber = new THREE.AmbientLight(0x222244, 0.4);
+    scene.add(amber);
+    const dirL = new THREE.DirectionalLight(0xffeedd, 0.8);
+    dirL.position.set(3, 5, 2);
+    scene.add(dirL);
+    const dirR = new THREE.DirectionalLight(0xd4af37, 0.4);
+    dirR.position.set(-3, 3, 4);
+    scene.add(dirR);
+
+    const colorFloor = new THREE.Mesh(
+      new THREE.PlaneGeometry(30, 20),
+      new THREE.MeshStandardMaterial({ color: 0x111122, metalness: 0.6, roughness: 0.4 })
+    );
+    colorFloor.rotation.x = -Math.PI / 2;
+    colorFloor.position.y = -1.5;
+    scene.add(colorFloor);
+
+    for (let i = 0; i < 20; i++) {
+      const pillar = new THREE.Mesh(
+        new THREE.BoxGeometry(0.2, 3, 0.2),
+        new THREE.MeshStandardMaterial({ color: 0x222244, metalness: 0.8, roughness: 0.2 })
+      );
+      pillar.position.set((i - 9.5) * 1.6, 0, -3);
+      scene.add(pillar);
+    }
+
+    const pedestalGeo = new THREE.CylinderGeometry(0.4, 0.5, 0.6, 8);
+    const sideMat = new THREE.MeshStandardMaterial({ color: 0x222233, metalness: 0.7, roughness: 0.3 });
+
+    this._relics.forEach((relic, i) => {
+      const x = (i - this._relics.length / 2) * 1.8;
+      const pedestal = new THREE.Mesh(pedestalGeo, sideMat);
+      pedestal.position.set(x, -1.2, 0);
+      scene.add(pedestal);
+
+      let mesh;
+      const mat = new THREE.MeshStandardMaterial({
+        color: relic.color, metalness: 0.7, roughness: 0.3,
+        emissive: relic.color, emissiveIntensity: 0.05,
+      });
+      switch (relic.shape) {
+        case 'box': mesh = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.4, 0.4), mat); break;
+        case 'sphere': mesh = new THREE.Mesh(new THREE.SphereGeometry(0.3, 12, 12), mat); break;
+        case 'cylinder': mesh = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.3, 0.5, 8), mat); break;
+        case 'cone': mesh = new THREE.Mesh(new THREE.ConeGeometry(0.3, 0.5, 8), mat); break;
+        default: mesh = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.3, 0.3), mat);
+      }
+      mesh.position.set(x, -0.8, 0);
+      mesh.userData = { relic, index: i, baseRotY: 0 };
+      scene.add(mesh);
+
+      const glowMat = new THREE.MeshBasicMaterial({ color: 0xd4af37, transparent: true, opacity: 0 });
+      const glow = new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.6, 0.6), glowMat);
+      glow.position.copy(mesh.position);
+      scene.add(glow);
+      mesh.userData.glow = glow;
+
+      const raycaster = new THREE.Raycaster();
+      const mouse = new THREE.Vector2();
+      const onHover = (e) => {
+        const rect = renderer.domElement.getBoundingClientRect();
+        mouse.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+        mouse.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+        raycaster.setFromCamera(mouse, camera);
+        const intersects = raycaster.intersectObjects(scene.children.filter(c => c.userData && c.userData.relic));
+        const label = document.getElementById('relicLabel');
+        if (intersects.length) {
+          const obj = intersects[0].object;
+          const r = obj.userData.relic;
+          label.querySelector('h3').textContent = r.name;
+          label.querySelector('p').textContent = r.desc;
+          label.classList.add('show');
+          gsap.to(obj.userData.glow.material, { opacity: 0.2, duration: 0.2 });
+          renderer.domElement.style.cursor = 'pointer';
+          this._currentRelic = obj;
+        } else {
+          label.classList.remove('show');
+          if (this._currentRelic) {
+            gsap.to(this._currentRelic.userData.glow.material, { opacity: 0, duration: 0.2 });
+            this._currentRelic = null;
+          }
+          renderer.domElement.style.cursor = 'default';
+        }
+      };
+      renderer.domElement.addEventListener('mousemove', onHover);
+      mesh.userData._hoverCleanup = () => renderer.domElement.removeEventListener('mousemove', onHover);
+    });
+
+    const centralIdx = Math.floor(this._relics.length / 2);
+    this._glitchRelicIndex = centralIdx;
+
+    this._glitchCleanup = glitchInit();
+
+    this._cameraTarget = centralIdx * 1.8;
+
+    const keyHandler = (e) => {
+      if (e.key === 'ArrowLeft') { this._cameraTarget = Math.max(-(this._relics.length / 2) * 1.8 + 3, this._cameraTarget - 1.8); }
+      if (e.key === 'ArrowRight') { this._cameraTarget = Math.min((this._relics.length / 2) * 1.8 - 3, this._cameraTarget + 1.8); }
+    };
+    window.addEventListener('keydown', keyHandler);
+    this._keyCleanup = () => window.removeEventListener('keydown', keyHandler);
+
+    const animate = () => {
+      if (!this.three) return;
+      camera.position.x += (this._cameraTarget - camera.position.x) * 0.05;
+      scene.children.forEach(c => {
+        if (c.userData && c.userData.relic && c.geometry) {
+          c.rotation.y += 0.01;
+        }
+      });
+      renderer.render(scene, camera);
+      this._animId = requestAnimationFrame(animate);
+    };
+    animate();
+
+    document.getElementById('relicLabel').classList.remove('show');
+    headerNavHighlight('#/museum');
+  },
+  destroy() {
+    if (this._animId) cancelAnimationFrame(this._animId);
+    if (this._keyCleanup) this._keyCleanup();
+    if (this._glitchCleanup) this._glitchCleanup();
+    if (this._relics) {
+      this._relics.forEach(r => { if (r._hoverCleanup) r._hoverCleanup(); });
+    }
+    const container = document.getElementById('museumThree');
+    destroyThreeScene(this.three, container);
+    this.three = null;
+    document.getElementById('relicLabel').classList.remove('show');
+  }
+});
+
+// Wing 8: Roast
+Router.register('#/roast', {
+  wingId: 8,
+  _timeouts: [],
+  init() {
+    this._runRoast();
+    document.getElementById('rerunRoast').onclick = () => {
+      document.getElementById('rerunRoast').style.display = 'none';
+      document.getElementById('roastOutput').innerHTML = '';
+      this._runRoast();
+    };
+  },
+  _runRoast() {
+    const output = document.getElementById('roastOutput');
+    const bar = document.getElementById('roastBarFill');
+    output.innerHTML = '';
+    bar.style.width = '0%';
+
+    const lines = [
+      { text: 'Analyzing Titan...', type: 'info', delay: 300 },
+      { text: '', type: '', delay: 200, isBar: true, pct: 30 },
+      { text: 'Searching for weaknesses...', type: 'info', delay: 600 },
+      { text: '', type: '', delay: 300, isBar: true, pct: 55 },
+      { text: 'Searching...', type: 'info', delay: 500 },
+      { text: '', type: '', delay: 200, isBar: true, pct: 70 },
+      { text: 'Searching...', type: 'info', delay: 700 },
+      { text: '', type: '', delay: 300, isBar: true, pct: 85 },
+      { text: 'Still searching...', type: 'warning', delay: 800 },
+      { text: '', type: '', delay: 400, isBar: true, pct: 92 },
+      { text: 'Still searching...', type: 'warning', delay: 400 },
+      { text: '', type: '', delay: 500, isBar: true, pct: 100 },
+      { text: 'Analysis complete.', type: 'success', delay: 400 },
+      { text: 'Found one: Sometimes forgets semicolons.', type: 'glitch', delay: 600 },
+      { text: 'Roast module exhausted. No further weaknesses detected.', type: 'info', delay: 500 },
+    ];
+
+    let totalDelay = 200;
+    lines.forEach(l => {
+      totalDelay += l.delay;
+      const t = setTimeout(() => {
+        if (l.isBar) {
+          bar.style.width = l.pct + '%';
+          return;
+        }
+        const div = document.createElement('div');
+        div.className = `roast-line ${l.type}`;
+        div.textContent = l.text;
+        output.appendChild(div);
+        requestAnimationFrame(() => div.classList.add('show'));
+        output.scrollTop = output.scrollHeight;
+      }, totalDelay);
+      this._timeouts.push(t);
+    });
+
+    const showBtn = setTimeout(() => {
+      document.getElementById('rerunRoast').style.display = 'inline-block';
+    }, totalDelay + 400);
+    this._timeouts.push(showBtn);
+    headerNavHighlight('#/roast');
+  },
+  destroy() {
+    this._timeouts.forEach(clearTimeout);
+    this._timeouts = [];
+  }
+});
+
+// Wing 9: Prophecy
+Router.register('#/prophecy', {
+  wingId: 9,
+  _intervals: [],
+  _timeouts: [],
+  init() {
+    const fill = document.getElementById('prophecyFill');
+    const status = document.getElementById('prophecyStatus');
+    const msgs = document.getElementById('prophecyMessages');
+    let pct = 0;
+    let task = 'Calculating the full extent of your greatness…';
+
+    const msgsList = [
+      'Syncing neural pathways...',
+      'Calibrating humility inhibitors...',
+      'Indexing charm quotient...',
+      'ERROR: Integer overflow. Awesomeness exceeds 64-bit limits.',
+      'Rebooting modesty.exe... failed.',
+      'Contacting higher powers for additional storage...',
+      'Compressing ego buffer...',
+      'Expanding confidence partition...',
+      'Running self-awareness diagnostic... result: negative.',
+      'Downloading additional charisma...',
+    ];
+
+    const statusInterval = setInterval(() => {
+      status.textContent = msgsList[Math.floor(Math.random() * msgsList.length)];
+    }, 1500);
+    this._intervals.push(statusInterval);
+
+    const msgInterval = setInterval(() => {
+      const div = document.createElement('div');
+      div.textContent = '> ' + msgsList[Math.floor(Math.random() * msgsList.length)];
+      msgs.appendChild(div);
+      msgs.scrollTop = msgs.scrollHeight;
+    }, 2000);
+    this._intervals.push(msgInterval);
+
+    const fillInterval = setInterval(() => {
+      if (pct < 99) {
+        const increment = Math.max(0.1, (99 - pct) * 0.02 + Math.random() * 0.5);
+        pct += increment;
+        if (pct > 99) pct = 99;
+        fill.style.width = pct + '%';
+      } else {
+        if (Math.random() < 0.01) {
+          fill.style.width = '100%';
+          setTimeout(() => {
+            pct = 0;
+            fill.style.width = '0%';
+            status.textContent = 'Re-evaluating under new cosmic constants...';
+            msgs.innerHTML = '';
+          }, 800);
+        }
+      }
+    }, 100);
+    this._intervals.push(fillInterval);
+    headerNavHighlight('#/prophecy');
+  },
+  destroy() {
+    this._intervals.forEach(clearInterval);
+    this._timeouts.forEach(clearTimeout);
+    this._intervals = [];
+    this._timeouts = [];
+  }
+});
+
+// Wing 10: Source Code
+Router.register('#/source', {
+  wingId: 10,
+  init() {
+    const files = {
+      greatness: { name: 'greatness.ts', code: 'export const titan = Infinity;\n\nexport function inspire() {\n  return "You are enough.";\n}\n\n// No further implementation needed', icon: '⎔' },
+      confidence: { name: 'confidence.ts', code: 'export const level = 127; // percent\n\nexport function getConfidence() {\n  return level;\n  // Always returns 127. Always.\n}\n\n// This is fine.', icon: '⎔' },
+      modesty: { name: 'modesty.ts', code: '// This file is intentionally empty.\n// No modesty data available.\n// Please try again later.\n// (You won\'t find any.)', icon: '⎔' },
+    };
+
+    document.querySelectorAll('.github-sidebar .file').forEach(el => {
+      el.onclick = () => {
+        document.querySelectorAll('.github-sidebar .file').forEach(f => f.classList.remove('active'));
+        el.classList.add('active');
+        const key = el.dataset.file;
+        const f = files[key];
+        if (f) {
+          document.getElementById('sourceFileName').textContent = f.name;
+          document.getElementById('sourceCode').textContent = f.code;
+        }
+      };
+    });
+    headerNavHighlight('#/source');
+  },
+  destroy() {}
+});
+
+// ─── GLOBAL FEATURES ─────────────────────────────────────────────────────────
+
+function headerNavHighlight(currentHash) {
+  document.querySelectorAll('.header-nav a').forEach(a => {
+    a.classList.toggle('active', a.getAttribute('href') === currentHash);
+  });
+}
+
+// Worship Mode
+const worshipState = {
+  active: false,
+  ps: null,
+};
+
+const worshipToggle = document.getElementById('worshipToggle');
+const worshipOverlay = document.getElementById('worshipOverlay');
+const worshipCanvas = document.getElementById('worshipCanvas');
+const praiseBtn = document.getElementById('praiseTitanBtn');
+const closeWorship = document.getElementById('closeWorship');
+
+let worshipRaysRunning = false;
+
+function initWorshipRays() {
+  const ctx = worshipCanvas.getContext('2d');
+  let time = 0;
+  worshipRaysRunning = true;
+
+  const resizeWorship = () => {
+    worshipCanvas.width = window.innerWidth;
+    worshipCanvas.height = window.innerHeight;
+  };
+  resizeWorship();
+  window.addEventListener('resize', resizeWorship);
+
+  function drawRays() {
+    if (!worshipRaysRunning) { window.removeEventListener('resize', resizeWorship); return; }
+    time += 0.005;
+    ctx.clearRect(0, 0, worshipCanvas.width, worshipCanvas.height);
+    const cx = worshipCanvas.width / 2;
+    const cy = worshipCanvas.height / 2;
+    const rays = 8 + Math.floor(Math.sin(time) * 2);
+    for (let i = 0; i < rays; i++) {
+      const angle = (i / rays) * Math.PI * 2 + time * 0.1;
+      const spread = 0.15 + Math.sin(time * 0.3 + i) * 0.05;
+      ctx.save();
+      ctx.translate(cx, cy);
+      ctx.rotate(angle - spread / 2);
+      const grad = ctx.createLinearGradient(0, 0, 0, worshipCanvas.height * 0.8);
+      grad.addColorStop(0, `rgba(212, 175, 55, ${0.06 + Math.sin(time * 2 + i) * 0.02})`);
+      grad.addColorStop(1, 'rgba(212, 175, 55, 0)');
+      ctx.fillStyle = grad;
+      ctx.beginPath();
+      ctx.moveTo(0, 0);
+      ctx.lineTo(-worshipCanvas.width / 4, worshipCanvas.height * 0.8);
+      ctx.lineTo(worshipCanvas.width / 4, worshipCanvas.height * 0.8);
+      ctx.closePath();
+      ctx.fill();
+      ctx.restore();
+    }
+    requestAnimationFrame(drawRays);
+  }
+  drawRays();
+}
+
+function toggleWorship() {
+  worshipState.active = !worshipState.active;
+  worshipOverlay.classList.toggle('active', worshipState.active);
+  worshipToggle.classList.toggle('active', worshipState.active);
+  if (worshipState.active) {
+    Sound.startWorshipChoir();
+    initWorshipRays();
+  } else {
+    worshipRaysRunning = false;
+    Sound.stopWorshipChoir();
+  }
+}
+
+worshipToggle.onclick = toggleWorship;
+closeWorship.onclick = toggleWorship;
+praiseBtn.onclick = () => {
+  State.addPraise();
+  const count = State.praiseClicks;
+  document.getElementById('praiseCounter').textContent = State.praiseCount.toLocaleString();
+  globalConfetti.burst(window.innerWidth / 2, window.innerHeight / 2, 30 + count);
+  if (count % 10 === 0) {
+    gsap.to(document.body, { x: 'random(-5, 5)', y: 'random(-5, 5)', duration: 0.05, repeat: 5, yoyo: true, onComplete: () => { gsap.set(document.body, { x: 0, y: 0 }); } });
+  }
+  praiseBtn.textContent = `PRAISE TITAN (${State.praiseCount.toLocaleString()})`;
+};
+
+// Exit Modal
+let leaveConfirmed = false;
+window.addEventListener('beforeunload', (e) => {
+  if (leaveConfirmed) return;
+  e.preventDefault();
+  e.returnValue = '';
+  document.getElementById('exitModal').classList.add('active');
+});
+
+document.getElementById('exitStay').onclick = () => {
+  document.getElementById('exitModal').classList.remove('active');
+  globalConfetti.burst(window.innerWidth / 2, window.innerHeight / 2, 150);
+};
+document.getElementById('exitLeave').onclick = () => {
+  leaveConfirmed = true;
+  document.getElementById('exitModal').classList.remove('active');
+  Sound.whisperBack();
+  const container = document.body;
+  gsap.to(container, { opacity: 0, duration: 1.5, ease: 'power2.in', onComplete: () => {
+    window.location.href = 'about:blank';
+  }});
+};
+
+// Secret Ending
+function showSecretEnding() {
+  document.getElementById('secretEndModal').classList.add('active');
+  const canvas = document.getElementById('certificateCanvas');
+  const ctx = canvas.getContext('2d');
+  const W = 400, H = 280;
+
+  ctx.clearRect(0, 0, W, H);
+  ctx.fillStyle = '#1a1a2e';
+  ctx.fillRect(0, 0, W, H);
+
+  ctx.strokeStyle = '#d4af37';
+  ctx.lineWidth = 4;
+  ctx.strokeRect(8, 8, W - 16, H - 16);
+  ctx.strokeStyle = '#f0d060';
+  ctx.lineWidth = 1;
+  ctx.strokeRect(14, 14, W - 28, H - 28);
+
+  ctx.fillStyle = '#d4af37';
+  ctx.font = 'bold 18px system-ui, sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText('✦ Certificate of Absolute Certainty ✦', W / 2, 50);
+
+  ctx.fillStyle = '#e8e8f0';
+  ctx.font = '12px system-ui, sans-serif';
+  ctx.fillText('This certifies that', W / 2, 85);
+  ctx.fillStyle = '#f0d060';
+  ctx.font = 'bold 22px serif';
+  ctx.fillText('Titan', W / 2, 115);
+  ctx.fillStyle = '#e8e8f0';
+  ctx.font = '12px system-ui, sans-serif';
+  ctx.fillText('has successfully completed', W / 2, 140);
+  ctx.fillText('The Ego Experience', W / 2, 160);
+  ctx.fillText('and absolutely nothing has changed.', W / 2, 180);
+
+  ctx.fillStyle = '#8888a0';
+  ctx.font = '10px monospace';
+  const today = new Date().toLocaleDateString();
+  ctx.fillText(`Issued: ${today}`, W / 2, 215);
+  ctx.fillText('The Department of Excessive Confidence', W / 2, 235);
+
+  ctx.fillStyle = '#d4af37';
+  ctx.font = '14px serif';
+  ctx.fillText('✦', W / 2, 260);
+}
+
+document.getElementById('downloadCert').onclick = () => {
+  const canvas = document.getElementById('certificateCanvas');
+  const link = document.createElement('a');
+  link.download = 'titan_certificate.png';
+  link.href = canvas.toDataURL('image/png');
+  link.click();
+};
+document.getElementById('closeSecretEnd').onclick = () => {
+  document.getElementById('secretEndModal').classList.remove('active');
+};
+
+// Glitch Effect
+function glitchInit() {
+  const canvas = document.getElementById('glitchCanvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  let glitching = false;
+  let glitchTimeout;
+
+  const resize = () => {
+    canvas.width = canvas.offsetWidth || 400;
+    canvas.height = canvas.offsetHeight || 400;
+  };
+  resize();
+
+  function doGlitch() {
+    if (!glitching) return;
+    const w = canvas.width, h = canvas.height;
+    ctx.fillStyle = 'rgba(0,0,0,0.1)';
+    ctx.fillRect(0, 0, w, h);
+    const bandCount = 3 + Math.floor(Math.random() * 5);
+    for (let i = 0; i < bandCount; i++) {
+      const y = Math.random() * h;
+      const bh = 2 + Math.random() * 8;
+      const offset = (Math.random() - 0.5) * 20;
+      ctx.fillStyle = `rgba(255, ${Math.random() > 0.5 ? '215' : '0'}, 0, ${0.1 + Math.random() * 0.3})`;
+      ctx.fillRect(offset, y, w, bh);
+    }
+    if (Math.random() > 0.7) {
+      const y = Math.random() * h;
+      const bh = 1 + Math.random() * 3;
+      ctx.fillStyle = `rgba(0, 255, ${Math.random() > 0.5 ? '255' : '100'}, ${0.3 + Math.random() * 0.5})`;
+      ctx.fillRect(0, y, w, bh);
+    }
+    setTimeout(doGlitch, 50 + Math.random() * 100);
+  }
+
+  function startGlitch() {
+    glitching = true;
+    document.getElementById('glitchOverlay').classList.add('active');
+    doGlitch();
+  }
+
+  function stopGlitch() {
+    glitching = false;
+    document.getElementById('glitchOverlay').classList.remove('active');
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+  }
+
+  const threeContainer = document.getElementById('museumThree');
+  if (threeContainer) {
+    threeContainer.addEventListener('mouseenter', () => {
+      if (glitchTimeout) clearTimeout(glitchTimeout);
+      glitchTimeout = setTimeout(startGlitch, 2000);
+    });
+    threeContainer.addEventListener('mouseleave', () => {
+      if (glitchTimeout) clearTimeout(glitchTimeout);
+      stopGlitch();
+    });
+  }
+
+  return () => {
+    stopGlitch();
+    if (glitchTimeout) clearTimeout(glitchTimeout);
+    if (threeContainer) {
+      threeContainer.removeEventListener('mouseenter', startGlitch);
+      threeContainer.removeEventListener('mouseleave', stopGlitch);
+    }
+  };
+}
+
+// ─── EASTER EGGS ─────────────────────────────────────────────────────────────
+let konamiIndex = 0;
+const konamiCode = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'b', 'a'];
+window.addEventListener('keydown', (e) => {
+  if (e.key === konamiCode[konamiIndex]) {
+    konamiIndex++;
+    if (konamiIndex === konamiCode.length) {
+      konamiIndex = 0;
+      globalConfetti.burst(window.innerWidth / 2, window.innerHeight / 2, 200);
+    }
+  } else {
+    konamiIndex = 0;
+  }
+});
+
+document.addEventListener('dblclick', (e) => {
+  if (Math.random() < 0.3) {
+    globalConfetti.burst(e.clientX, e.clientY, 30 + Math.floor(Math.random() * 50));
+  }
+});
+
+// ─── BOOT ────────────────────────────────────────────────────────────────────
+State.init();
+globalConfetti.init();
+
+// Expose to header nav
+document.querySelectorAll('.header-nav a').forEach(a => {
+  a.addEventListener('click', (e) => {
+    e.preventDefault();
+    Router.navigate(a.getAttribute('href'));
+  });
+});
+
+Router.init();
+
+// If no hash, set to warning
+if (!window.location.hash) {
+  window.location.hash = '#/';
+}
+
+console.log('%c✦ The Department of Excessive Confidence ✦', 'font-size:24px;color:#d4af37;font-weight:bold');
+console.log('%cYou found the console. Nice. Titan approves.', 'font-size:14px;color:#f0d060');
+
+</script>
+</body>
+</html>
